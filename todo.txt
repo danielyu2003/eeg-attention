@@ -1,0 +1,1 @@
+- email mingxiao about how long 1 second would be (what is the sample length?) 
