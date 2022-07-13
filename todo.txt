@@ -1,6 +1,4 @@
 - email mingxiao about how long 1 second would be (what is the sample length?) 
 - include frontal electrodes (FP1 and FP2)?
-- note that the formatting for our datasets are different
 
 - divide everything in the resting dataset by 10^6?
-- also transpose the resting dataset and cut out the non electrode columns to match our data
