@@ -56,6 +56,7 @@ class EEGClassifier:
         plt.figure()
         plt.plot(range(0, len(self.y_test)), self.y_test, 'b', label='truth')
         plt.plot(range(0,len(self.y_pred)), self.y_pred,'r',label='SVM')
+        plt.legend()
         plt.show()
         pass
 
@@ -76,6 +77,8 @@ def test():
 def main():
     '''
     target1, target2, the resting dataset, and the attention dataset should all have the same length/number of samples
+    0 represents resting
+    1 represents attentive
     '''
     
     target1 = np.zeros(1000)
@@ -86,11 +89,11 @@ def main():
     atten_test = 100 * (np.random.rand(1000, 4) - 0.5)
     # generated a fake sample of large amplitudes between -50 and 50
     
-    concat1 = target1.reshape(-1, 1)
-    concat2 = target2.reshape(-1, 1)
+    concatTarget1 = target1.reshape(-1, 1)
+    concatTarget2 = target2.reshape(-1, 1)
     
-    test1 = np.concatenate((concat1, rest_test), axis=1)
-    test2 = np.concatenate((concat2, atten_test), axis=1)
+    test1 = np.concatenate((concatTarget1, rest_test), axis=1)
+    test2 = np.concatenate((concatTarget2, atten_test), axis=1)
     
     all_samples = np.concatenate((test1, test2))
     
@@ -110,4 +113,5 @@ def main():
 
 if __name__ == '__main__':
     # main()
+    test()
     pass
