@@ -53,11 +53,13 @@ class EEGClassifier:
         pass
 
 def data(abs_path):
-    return np.array(list(csv.reader(open(f"{abs_path}", "rt"), delimiter=","))).astype("float")
+    df = pd.read_csv(f'{abs_path}', header=None)
+    return df.to_numpy()[1:,1:]
 
 def test():
     from sklearn import datasets
     cancer = datasets.load_breast_cancer()
+    # print(type(cancer.data[0]))
     test = EEGClassifier(cancer.data, cancer.target, 0.3, 109)
     test.fit()
     test.predict()
@@ -65,7 +67,6 @@ def test():
     pass
 
 def main():
-    print(data("data\\Subject_1\\sub_csv\\Sub_1_Block_1.csv"))
     pass
 
 if __name__ == '__main__':
