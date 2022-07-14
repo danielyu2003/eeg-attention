@@ -3,7 +3,10 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
+import csv
+import os
 
+os.chdir(os.path.dirname(__file__))
 
 class EEGClassifier:
     
@@ -14,7 +17,7 @@ class EEGClassifier:
             see the official scikit-learn website for more details 
             (https://scikit-learn.org/stable/modules/svm.html)
         @param data : numpy int[]
-            a 2d array/matrix of shape (num of samples, num of features)
+            an array/matrix of shape (num of samples/y, num of features/x)
         @param target : numpy int[]
             a 1d array of length (num of samples), where each sample is classified as a 1 or a 0
         @param test_size : float
@@ -40,18 +43,29 @@ class EEGClassifier:
         self.y_pred = self.classifier.predict(self.x_test)
         pass
 
-    # def getMetrics(self):
-    #     print("Accuracy:",metrics.accuracy_score(self.y_test, self.y_pred))
-    #     print("Precision:",metrics.precision_score(self.y_test, self.y_pred))
-    #     print("Recall:",metrics.recall_score(self.y_test, self.y_pred))
-    #     pass
-    
+    def getMetrics(self):
+        '''
+        Note: will not work when there is no proper data and target set
+        '''
+        print("Accuracy:",metrics.accuracy_score(self.y_test, self.y_pred))
+        print("Precision:",metrics.precision_score(self.y_test, self.y_pred))
+        print("Recall:",metrics.recall_score(self.y_test, self.y_pred))
+        pass
+
+def data(abs_path):
+    return np.array(list(csv.reader(open(f"{abs_path}", "rt"), delimiter=","))).astype("float")
+
+def test():
+    from sklearn import datasets
+    cancer = datasets.load_breast_cancer()
+    test = EEGClassifier(cancer.data, cancer.target, 0.3, 109)
+    test.fit()
+    test.predict()
+    test.getMetrics()
+    pass
+
 def main():
-    print("starting")
-    X = np.arange(10).reshape((5, 2))
-    y = range(5)
-    test = EEGClassifier(X, y,0.33,42)
-    print("finished")
+    print(data("data\\Subject_1\\sub_csv\\Sub_1_Block_1.csv"))
     pass
 
 if __name__ == '__main__':

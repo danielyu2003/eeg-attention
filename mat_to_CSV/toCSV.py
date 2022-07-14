@@ -78,7 +78,7 @@ def deleteMats():
 
 def main():
     print('starting')
-    
+    toCSV('2', 2)
     print('finished')
     return
 
