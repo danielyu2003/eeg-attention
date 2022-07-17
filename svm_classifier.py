@@ -1,6 +1,7 @@
 from sklearn import svm
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -11,9 +12,11 @@ os.chdir(os.path.dirname(__file__))
 
 class EEGClassifier:
     
-    def __init__(self, data, target, test_ratio=0.25, random_seed=None, shuffle_choice=True, C_val=1.0, kernel_choice='linear', gamma_choice = 'scale'):
+    def __init__(self, data, target, test_ratio=0.25, random_seed=None, C_val=1.0, kernel_choice='rbf', gamma_choice = 'scale'):
         '''
         @param kernel_choice : str
+            default = 'rbf' (radial basis function)
+                ideal for nonlinearly seperable data
             selects kernel choice for the support vector machine
             see the official scikit-learn website for more details 
             (https://scikit-learn.org/stable/modules/svm.html)
@@ -33,7 +36,7 @@ class EEGClassifier:
         self.target = target
         # splitting the testing and training dataset could be done manually, 
         # just keep in mind the correct format for numpy array inputs, etc.
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.data, self.target,test_size=test_ratio,random_state=random_seed,shuffle=shuffle_choice)
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.data, self.target,test_size=test_ratio,random_state=random_seed)
         
         self.y_pred = np.zeros(self.y_test.size)
         pass
@@ -46,6 +49,13 @@ class EEGClassifier:
         self.y_pred = self.classifier.predict(self.x_test)
         pass
 
+    def predictExample(self, example):
+        '''
+        @param example : float[][]
+            contains an array of samples (which are arrays of floats matching the feature dimensions)
+        '''
+        return self.classifier.predict(example)
+
     def getMetrics(self):
         print("Accuracy:",metrics.accuracy_score(self.y_test, self.y_pred))
         print("Precision:",metrics.precision_score(self.y_test, self.y_pred))
@@ -57,6 +67,41 @@ class EEGClassifier:
         plt.plot(range(0, len(self.y_test)), self.y_test, 'b', label='truth')
         plt.plot(range(0,len(self.y_pred)), self.y_pred,'r',label='SVM')
         plt.legend()
+        plt.show()
+        pass
+
+    def plotSupportVectors(self):
+        '''
+        Note that the initial data param must be unshuffled, in order, and balanced for this to work
+        '''
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        support_vectors = self.classifier.support_vectors_
+        class1 = self.data[:len(self.data)//2]
+        class2 = self.data[len(self.data)//2:]
+
+        supp_x = support_vectors[:, 0]
+        supp_y = support_vectors[:, 1]
+        supp_z = support_vectors[:, 2]
+        supp_c = support_vectors[:, 3]
+
+        class1_x = class1[:, 0]
+        class1_y = class1[:, 1]
+        class1_z = class1[:, 2]
+        class1_c = class1[:, 3]
+
+        class2_x = class2[:, 0]
+        class2_y = class2[:, 1]
+        class2_z = class2[:, 2]
+        class2_c = class2[:, 3]
+
+        img1 = ax.scatter(supp_x, supp_y, supp_z, c=supp_c, label='support vectors', cmap=plt.summer())
+        img2 = ax.scatter(class1_x, class1_y, class1_z, c=class1_c, label='resting', cmap=plt.cool())
+        img3 = ax.scatter(class2_x, class2_y, class2_z, c=class2_c, label='concentrating', cmap=plt.hot())
+        ax.legend()
+        fig.colorbar(img1)
+        fig.colorbar(img2)
+        fig.colorbar(img3)
         plt.show()
         pass
 
@@ -80,38 +125,28 @@ def main():
     0 represents resting
     1 represents attentive
     '''
-    
+
     target1 = np.zeros(1000)
     target2 = np.ones(1000)
-    
     rest_test = 10 * (np.random.rand(1000, 4) - 0.5)
     # generates a fake sample of small amplitudes between -5 and 5
     atten_test = 100 * (np.random.rand(1000, 4) - 0.5)
     # generated a fake sample of large amplitudes between -50 and 50
     
-    concatTarget1 = target1.reshape(-1, 1)
-    concatTarget2 = target2.reshape(-1, 1)
+    samples = np.concatenate((rest_test, atten_test))
+    targets = np.concatenate((target1, target2)) 
     
-    test1 = np.concatenate((concatTarget1, rest_test), axis=1)
-    test2 = np.concatenate((concatTarget2, atten_test), axis=1)
-    
-    all_samples = np.concatenate((test1, test2))
-    
-    np.random.shuffle(all_samples)
-    
-    seperated = np.hsplit(all_samples, [1])
-    
-    targets = seperated[0].flatten()
-    samples = seperated[1]
-    
-    test = EEGClassifier(samples, targets, 0.3, 109)
+    test = EEGClassifier(samples, targets, test_ratio=0.3, random_seed=42)
+
     test.fit()
     test.predict()
     test.getMetrics()
-    test.plotAcc()
+    # test.plotSupportVectors()
+    # test.plotAcc()
+    # print(test.predictExample([[15,15,15,15]]))
     pass
 
 if __name__ == '__main__':
-    # main()
-    test()
+    test = data('data\\Sub_1_Block_1.csv')
+    print(test[:, 3].shape)
     pass
