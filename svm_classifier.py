@@ -77,6 +77,9 @@ class EEGClassifier:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         support_vectors = self.classifier.support_vectors_
+
+        print(f"Num of support vectors: {len(support_vectors)}")
+
         class1 = self.data[:len(self.data)//2]
         class2 = self.data[len(self.data)//2:]
 
@@ -98,6 +101,7 @@ class EEGClassifier:
         img1 = ax.scatter(supp_x, supp_y, supp_z, c=supp_c, label='support vectors', cmap=plt.summer())
         img2 = ax.scatter(class1_x, class1_y, class1_z, c=class1_c, label='resting', cmap=plt.cool())
         img3 = ax.scatter(class2_x, class2_y, class2_z, c=class2_c, label='concentrating', cmap=plt.hot())
+
         ax.legend()
         fig.colorbar(img1)
         fig.colorbar(img2)
@@ -105,9 +109,28 @@ class EEGClassifier:
         plt.show()
         pass
 
-def data(abs_path):
+def data(abs_path, type=True):
     df = pd.read_csv(f'{abs_path}', header=None)
-    return df.to_numpy()[1:,1:]
+    if (type==True):
+        return df.to_numpy()[1:,1:]
+    else:
+        return df.to_numpy()
+
+def plotData(abs_path, startInd, endInd, choi_type=True):
+    test = data(abs_path, choi_type)
+    
+    AF3 = test[startInd:endInd, 3]
+    AF4 = test[startInd:endInd, 5]
+    F3 = test[startInd:endInd, 9]
+    F4 = test[startInd:endInd, 13]
+
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
+
+    ax1.plot(range(endInd-startInd), AF3)
+    ax2.plot(range(endInd-startInd), AF4)
+    ax3.plot(range(endInd-startInd), F3)
+    ax4.plot(range(endInd-startInd), F4)
+    plt.show()
 
 def test():
     from sklearn import datasets
@@ -132,6 +155,34 @@ def main():
     # generates a fake sample of small amplitudes between -5 and 5
     atten_test = 100 * (np.random.rand(1000, 4) - 0.5)
     # generated a fake sample of large amplitudes between -50 and 50
+
+    quad_1 = rest_test[:, 0]
+    quad_one = atten_test[:, 0]
+
+    quad_2 = rest_test[:, 1]
+    quad_two = atten_test[:, 1]
+
+    quad_3 = rest_test[:, 2]
+    quad_three = atten_test[:, 2]
+
+    quad_4 = rest_test[:, 3]
+    quad_four = atten_test[:, 3]
+
+
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
+
+    ax1.plot(range(1000), quad_one, label='concentrating')
+    ax1.plot(range(1000), quad_1, label='resting')
+    ax2.plot(range(1000), quad_two)
+    ax2.plot(range(1000), quad_2)
+    ax3.plot(range(1000), quad_three)
+    ax3.plot(range(1000), quad_3)
+    ax4.plot(range(1000), quad_four)
+    ax4.plot(range(1000), quad_4)
+    fig.legend()
+    plt.show()
+
+
     
     samples = np.concatenate((rest_test, atten_test))
     targets = np.concatenate((target1, target2)) 
@@ -141,12 +192,25 @@ def main():
     test.fit()
     test.predict()
     test.getMetrics()
-    # test.plotSupportVectors()
-    # test.plotAcc()
+    test.plotSupportVectors()
+    test.plotAcc()
     # print(test.predictExample([[15,15,15,15]]))
     pass
 
 if __name__ == '__main__':
-    test = data('data\\Sub_1_Block_1.csv')
-    print(test[:, 3].shape)
+    # data_path = 'data\\Sub_1_Block_1.csv'
+
+    # test = data(data_path)
+
+    # AF3 = test[0:1000, 3][np.newaxis]
+    # AF4 = test[0:1000, 5][np.newaxis]
+    # F3 = test[0:1000, 9][np.newaxis]
+    # F4 = test[0:1000, 13][np.newaxis]
+
+    # samples = np.hstack((AF3.T, AF4.T, F3.T, F4.T))
+
+    # plotData(data_path, 2000, 3000)
+
+    main()
+
     pass
