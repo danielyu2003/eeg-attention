@@ -88,25 +88,23 @@ def test():
     test.plotAcc()
     pass
 
-def resample_by_interpolation(signal, input_fs, output_fs):
+def resample(signal, orig_freq, desired_freq):
+    '''
+    For multidimensional arrays, only works if all columns share the same length
+    '''
+    scale = desired_freq/orig_freq
+    new_len = round(len(signal) * scale)
 
-    scale = output_fs / input_fs
-    # calculate new length of sample
-    n = round(len(signal) * scale)
-
-    # use linear interpolation
-    # endpoint keyword means than linspace doesn't go all the way to 1.0
-    # If it did, there are some off-by-one errors
-    # e.g. scale=2.0, [1,2,3] should go to [1,1.5,2,2.5,3,3]
-    # but with endpoint=True, we get [1,1.4,1.8,2.2,2.6,3]
-    # Both are OK, but since resampling will often involve
-    # exact ratios (i.e. for 44100 to 22050 or vice versa)
-    # using endpoint=False gets less noise in the resampled sound
+    if (signal.ndim > 1):
+        output = np.empty([new_len, signal.ndim])
+        for ind in range(signal.ndim):
+            output[:, ind] = resample(signal[:, ind], orig_freq, desired_freq)
+        return output
+    
     resampled_signal = np.interp(
-        np.linspace(0.0, 1.0, n, endpoint=False),  # where to interpret
-        np.linspace(0.0, 1.0, len(signal), endpoint=False),  # known positions
-        signal,  # known data points
-    )
+        np.linspace(0.0, 1.0, new_len, endpoint=False),
+        np.linspace(0.0, 1.0, len(signal), endpoint=False),
+        signal)
     return resampled_signal
 
 if __name__ == '__main__':
@@ -124,11 +122,11 @@ if __name__ == '__main__':
 
     eye_samps = eye_samps.to_numpy()
 
-    upsampled_x = resample_by_interpolation(eye_samps[:, 0], 120, 256)
+    upsampled = resample(eye_samps, 120, 256)
 
     fig, (ax1, ax2) = plt.subplots(2)
 
-    ax1.plot(range(len(upsampled_x)), upsampled_x)
+    ax1.plot(range(len(upsampled[:, 0])), upsampled[:, 0])
     ax2.plot(range(len(col1)), col1)
 
     plt.show()
