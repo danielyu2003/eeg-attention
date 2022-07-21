@@ -3,6 +3,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+import scipy
 import numpy as np
 import pandas as pd
 import csv
@@ -77,22 +78,6 @@ def data(abs_path, type=True):
     else:
         return df.to_numpy()
 
-def plotData(abs_path, startInd, endInd, choi_type=True):
-    test = data(abs_path, choi_type)
-    
-    AF3 = test[startInd:endInd, 3]
-    AF4 = test[startInd:endInd, 5]
-    F3 = test[startInd:endInd, 9]
-    F4 = test[startInd:endInd, 13]
-
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
-
-    ax1.plot(range(endInd-startInd), AF3)
-    ax2.plot(range(endInd-startInd), AF4)
-    ax3.plot(range(endInd-startInd), F3)
-    ax4.plot(range(endInd-startInd), F4)
-    plt.show()
-
 def test():
     from sklearn import datasets
     cancer = datasets.load_breast_cancer()
@@ -103,11 +88,49 @@ def test():
     test.plotAcc()
     pass
 
+def resample_by_interpolation(signal, input_fs, output_fs):
+
+    scale = output_fs / input_fs
+    # calculate new length of sample
+    n = round(len(signal) * scale)
+
+    # use linear interpolation
+    # endpoint keyword means than linspace doesn't go all the way to 1.0
+    # If it did, there are some off-by-one errors
+    # e.g. scale=2.0, [1,2,3] should go to [1,1.5,2,2.5,3,3]
+    # but with endpoint=True, we get [1,1.4,1.8,2.2,2.6,3]
+    # Both are OK, but since resampling will often involve
+    # exact ratios (i.e. for 44100 to 22050 or vice versa)
+    # using endpoint=False gets less noise in the resampled sound
+    resampled_signal = np.interp(
+        np.linspace(0.0, 1.0, n, endpoint=False),  # where to interpret
+        np.linspace(0.0, 1.0, len(signal), endpoint=False),  # known positions
+        signal,  # known data points
+    )
+    return resampled_signal
+
 if __name__ == '__main__':
     # data_path = 'data\\Sub_1_Block_1.csv'
 
     # test = data(data_path)
 
+    df = pd.read_csv(r"C:\Users\yudan\Downloads\Training_11222021_134103.csv", skiprows=1)[1:]
 
+    col1 = df.loc[:, "EyeX"]
+    col2 = df.loc[:, "EyeY"]
+    col3 = df.loc[:, "EyeZ"]
+
+    eye_samps = pd.concat([col1, col2, col3], axis=1)
+
+    eye_samps = eye_samps.to_numpy()
+
+    upsampled_x = resample_by_interpolation(eye_samps[:, 0], 120, 256)
+
+    fig, (ax1, ax2) = plt.subplots(2)
+
+    ax1.plot(range(len(upsampled_x)), upsampled_x)
+    ax2.plot(range(len(col1)), col1)
+
+    plt.show()
 
     pass
