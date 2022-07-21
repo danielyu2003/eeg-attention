@@ -1,11 +1,12 @@
-from sklearn import svm
-from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn import metrics
+from sklearn import svm
 import matplotlib.pyplot as plt
-import scipy
-import numpy as np
 import pandas as pd
+import numpy as np
+import statistics
+import scipy
 import csv
 import os
 
@@ -96,8 +97,8 @@ def resample(signal, orig_freq, desired_freq):
     new_len = round(len(signal) * scale)
 
     if (signal.ndim > 1):
-        output = np.empty([new_len, signal.ndim])
-        for ind in range(signal.ndim):
+        output = np.empty([new_len, signal.ndim+1])
+        for ind in range(signal.ndim+1):
             output[:, ind] = resample(signal[:, ind], orig_freq, desired_freq)
         return output
     
@@ -106,6 +107,8 @@ def resample(signal, orig_freq, desired_freq):
         np.linspace(0.0, 1.0, len(signal), endpoint=False),
         signal)
     return resampled_signal
+
+
 
 if __name__ == '__main__':
     # data_path = 'data\\Sub_1_Block_1.csv'
@@ -124,11 +127,18 @@ if __name__ == '__main__':
 
     upsampled = resample(eye_samps, 120, 256)
 
-    fig, (ax1, ax2) = plt.subplots(2)
+    # fig, (ax1, ax2) = plt.subplots(2)
 
-    ax1.plot(range(len(upsampled[:, 0])), upsampled[:, 0])
-    ax2.plot(range(len(col1)), col1)
+    # ax1.plot(range(len(upsampled[:, 0])), upsampled[:, 0])
+    # ax2.plot(range(len(col1)), col1)
 
-    plt.show()
+    # plt.show()
+
+    transposed = upsampled.T
+
+    sample = transposed[0][:12]
+
+    print(f"stdev : {statistics.stdev(sample)}, {np.std(sample)}")
+    print(f"mean : {statistics.mean(sample)}, {np.mean(sample)}")
 
     pass
