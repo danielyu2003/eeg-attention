@@ -70,45 +70,6 @@ class EEGClassifier:
         plt.show()
         pass
 
-    def plotSupportVectors(self):
-        '''
-        Note that the initial data param must be unshuffled, in order, and balanced for this to work
-        '''
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        support_vectors = self.classifier.support_vectors_
-
-        print(f"Num of support vectors: {len(support_vectors)}")
-
-        class1 = self.data[:len(self.data)//2]
-        class2 = self.data[len(self.data)//2:]
-
-        supp_x = support_vectors[:, 0]
-        supp_y = support_vectors[:, 1]
-        supp_z = support_vectors[:, 2]
-        supp_c = support_vectors[:, 3]
-
-        class1_x = class1[:, 0]
-        class1_y = class1[:, 1]
-        class1_z = class1[:, 2]
-        class1_c = class1[:, 3]
-
-        class2_x = class2[:, 0]
-        class2_y = class2[:, 1]
-        class2_z = class2[:, 2]
-        class2_c = class2[:, 3]
-
-        img1 = ax.scatter(supp_x, supp_y, supp_z, c=supp_c, label='support vectors', cmap=plt.summer())
-        img2 = ax.scatter(class1_x, class1_y, class1_z, c=class1_c, label='resting', cmap=plt.cool())
-        img3 = ax.scatter(class2_x, class2_y, class2_z, c=class2_c, label='concentrating', cmap=plt.hot())
-
-        ax.legend()
-        fig.colorbar(img1)
-        fig.colorbar(img2)
-        fig.colorbar(img3)
-        plt.show()
-        pass
-
 def data(abs_path, type=True):
     df = pd.read_csv(f'{abs_path}', header=None)
     if (type==True):
@@ -142,75 +103,11 @@ def test():
     test.plotAcc()
     pass
 
-def main():
-    '''
-    target1, target2, the resting dataset, and the attention dataset should all have the same length/number of samples
-    0 represents resting
-    1 represents attentive
-    '''
-
-    target1 = np.zeros(1000)
-    target2 = np.ones(1000)
-    rest_test = 10 * (np.random.rand(1000, 4) - 0.5)
-    # generates a fake sample of small amplitudes between -5 and 5
-    atten_test = 100 * (np.random.rand(1000, 4) - 0.5)
-    # generated a fake sample of large amplitudes between -50 and 50
-
-    quad_1 = rest_test[:, 0]
-    quad_one = atten_test[:, 0]
-
-    quad_2 = rest_test[:, 1]
-    quad_two = atten_test[:, 1]
-
-    quad_3 = rest_test[:, 2]
-    quad_three = atten_test[:, 2]
-
-    quad_4 = rest_test[:, 3]
-    quad_four = atten_test[:, 3]
-
-
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
-
-    ax1.plot(range(1000), quad_one, label='concentrating')
-    ax1.plot(range(1000), quad_1, label='resting')
-    ax2.plot(range(1000), quad_two)
-    ax2.plot(range(1000), quad_2)
-    ax3.plot(range(1000), quad_three)
-    ax3.plot(range(1000), quad_3)
-    ax4.plot(range(1000), quad_four)
-    ax4.plot(range(1000), quad_4)
-    fig.legend()
-    plt.show()
-
-
-    
-    samples = np.concatenate((rest_test, atten_test))
-    targets = np.concatenate((target1, target2)) 
-    
-    test = EEGClassifier(samples, targets, test_ratio=0.3, random_seed=42)
-
-    test.fit()
-    test.predict()
-    test.getMetrics()
-    test.plotSupportVectors()
-    test.plotAcc()
-    # print(test.predictExample([[15,15,15,15]]))
-    pass
-
 if __name__ == '__main__':
     # data_path = 'data\\Sub_1_Block_1.csv'
 
     # test = data(data_path)
 
-    # AF3 = test[0:1000, 3][np.newaxis]
-    # AF4 = test[0:1000, 5][np.newaxis]
-    # F3 = test[0:1000, 9][np.newaxis]
-    # F4 = test[0:1000, 13][np.newaxis]
 
-    # samples = np.hstack((AF3.T, AF4.T, F3.T, F4.T))
-
-    # plotData(data_path, 2000, 3000)
-
-    main()
 
     pass
