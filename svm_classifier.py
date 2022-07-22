@@ -49,10 +49,11 @@ class EEGClassifier:
         '''
         Parameters:
         ---
-        kernel_choice : str
-            default = 'rbf' (radial basis function)
-                ideal for nonlinearly seperable data
+        kernel_choice : str, default='rbf' (radial basis function)
             selects kernel choice for the support vector machine
+            Notes:
+            ---
+            rbf is ideal for nonlinearly seperable data with more samples than features
             see the official scikit-learn website for more details 
             (https://scikit-learn.org/stable/modules/svm.html)
         data : numpy.ndarray.dtype(float64)
@@ -203,6 +204,5 @@ if __name__ == '__main__':
     # print(np.std(sample[:25]))
     # print(np.std(eye_samps[:12, 0]))
 
-
-
+    print(np.mean([0,2,4,6,8,10,12,14]))
     pass
