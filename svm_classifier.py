@@ -201,8 +201,10 @@ if __name__ == '__main__':
     sample = transposed[0]
 
     # which data should be mapped? The resampled or the original?
+    # do we take the sample standard deviation (statistics module) or the entire population (np.std)?
+
     # print(np.std(sample[:25]))
     # print(np.std(eye_samps[:12, 0]))
 
-    print(np.mean([0,2,4,6,8,10,12,14]))
+    print(np.m)
     pass
