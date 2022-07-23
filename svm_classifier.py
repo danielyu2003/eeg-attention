@@ -124,12 +124,6 @@ class EEGClassifier:
         plt.show()
         pass
 
-def data(abs_path, type=True):
-    df = pd.read_csv(f'{abs_path}', header=None)
-    if (type==True):
-        return df.to_numpy()[1:,1:]
-    else:
-        return df.to_numpy()
 
 def resample(signal, orig_freq, desired_freq):
     '''
@@ -170,13 +164,74 @@ def resample(signal, orig_freq, desired_freq):
         signal)
     return resampled_signal
 
+def meanAndStdev(samps, freq_wind, choice=True):
+    '''
+    Parameters:
+    ---
+    samps : np.ndarray.dtype(float)
+        1d array of input data
+    freq_wind : int
+        Frequency window, approximately a tenth of the sampling frequency
+    choice : bool
 
-if __name__ == '__main__':
-    # data_path = 'data\\Sub_1_Block_1.csv'
+    Returns:
+    ---
+    targets : np.ndarray.dtype(float)
+    reshaped : np.ndarray.dtype(float)
 
-    # test = data(data_path)
+    Both return a 2d array containing the mean and stdev of each window specified by freq_wind
+    '''
+    remainder = len(samps)%freq_wind
+    targets = [[np.mean(samps[ind*freq_wind:(ind*freq_wind)+freq_wind]), np.std(samps[ind*freq_wind:ind*freq_wind + freq_wind])] for ind in range(len(samps)//freq_wind)]
+    if choice:
+        reshaped = []
+        for ind in range(len(targets)):
+            reshaped += [targets[ind]]*freq_wind
+    if remainder:
+        targets += [[np.mean(samps[remainder:]), np.std(samps[remainder:])]]
+        if choice:
+            reshaped += remainder*[targets[-1]]
+    if choice:
+        return np.array(reshaped)
+    return np.array(targets)
 
-    df = pd.read_csv(r"C:\Users\yudan\Downloads\Training_11222021_134103.csv", skiprows=1)[1:]
+def averageThree(arr1, arr2, arr3, samp_freq):
+    '''
+    assuming all three inputs are of the same length
+    '''
+    averaged = []
+    data1 = meanAndStdev(arr1, samp_freq//10)
+    data2 = meanAndStdev(arr2, samp_freq//10)
+    data3 = meanAndStdev(arr3, samp_freq//10)
+
+    for ind in range(len(data1)):
+        averaged+=[[np.mean((data1[ind, 0], data2[ind, 0], data3[ind, 0])), np.mean((data1[ind, 1], data2[ind, 1], data3[ind, 1]))]]
+
+    return np.array(averaged)
+
+def targets(arr):
+    result = np.empty(len(arr))
+    for ind in range(len(arr)):
+        if arr[ind, 0] > arr[ind, 1]:
+            result[ind] = 0 
+        else:
+            result[ind] = 1
+    return result
+
+def getTargets(eye_path, samp_freq):
+    '''
+    Takes in eye tracking data (as csv) and returns a np array of 1s and 0s
+
+    Parameters:
+    ---
+    eye_path : str
+
+    Returns:
+    ---
+    targets : np.ndarray.dtype(int)
+    '''
+
+    df = pd.read_csv(eye_path, skiprows=1)[1:]
 
     col1 = df.loc[:, "EyeX"]
     col2 = df.loc[:, "EyeY"]
@@ -186,23 +241,21 @@ if __name__ == '__main__':
 
     eye_samps = eye_samps.to_numpy()
 
-    upsampled = resample(eye_samps, 120, 256)
-
-    # fig, (ax1, ax2) = plt.subplots(2)
-
-    # ax1.plot(range(len(upsampled[:, 0])), upsampled[:, 0])
-    # ax2.plot(range(len(col1)), col1)
-
-    # plt.show()
+    upsampled = resample(eye_samps, samp_freq, 256)
 
     transposed = upsampled.T
 
-    sample = transposed[0]
+    # arr1 = transposed[0]
+    # arr2 = transposed[1]
+    # arr3 = transposed[2]
 
-    # which data should be mapped? The resampled or the original?
-    # print(np.std(sample[:25]))
-    # print(np.std(eye_samps[:12, 0]))
+    # targets = targets(averageThree(arr1, arr2, arr3, samp_freq))
 
+    # return targets
 
+    pass
 
+if __name__ == '__main__':
+
+    
     pass
