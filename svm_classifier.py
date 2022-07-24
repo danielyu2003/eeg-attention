@@ -198,6 +198,8 @@ def meanAndStdev(samps, freq_wind, choice=True):
 def averageThree(arr1, arr2, arr3, samp_freq):
     '''
     assuming all three inputs are of the same length
+
+    returns average of each mean and stdev of each sample
     '''
     averaged = []
     data1 = meanAndStdev(arr1, samp_freq//10)
@@ -210,21 +212,25 @@ def averageThree(arr1, arr2, arr3, samp_freq):
     return np.array(averaged)
 
 def targets(arr):
+    print(arr)
     result = np.empty(len(arr))
     for ind in range(len(arr)):
+        
         if arr[ind, 0] > arr[ind, 1]:
             result[ind] = 0 
         else:
             result[ind] = 1
+
     return result
 
-def getTargets(eye_path, samp_freq):
+def getTargets(eye_path, samp_freq, desired_freq):
     '''
     Takes in eye tracking data (as csv) and returns a np array of 1s and 0s
 
     Parameters:
     ---
     eye_path : str
+    samp_freq : int
 
     Returns:
     ---
@@ -241,21 +247,40 @@ def getTargets(eye_path, samp_freq):
 
     eye_samps = eye_samps.to_numpy()
 
-    upsampled = resample(eye_samps, samp_freq, 256)
+    upsampled = resample(eye_samps, samp_freq, desired_freq)
 
     transposed = upsampled.T
 
-    # arr1 = transposed[0]
-    # arr2 = transposed[1]
-    # arr3 = transposed[2]
+    arr1 = transposed[0]
+    arr2 = transposed[1]
+    arr3 = transposed[2]
 
-    # targets = targets(averageThree(arr1, arr2, arr3, samp_freq))
+    samp_targets = targets(averageThree(arr1, arr2, arr3, samp_freq))
 
-    # return targets
-
-    pass
+    return samp_targets
 
 if __name__ == '__main__':
 
-    
+    # getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 45, 256)
+
+    # leave out eyeZ data?
+
+    # assign labels based on coefficient of variation? stdev/mean
+
+    df = pd.read_csv(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", skiprows=1)[1:]
+
+    col1 = df.loc[:, "EyeX"]
+    col2 = df.loc[:, "EyeY"]
+    col3 = df.loc[:, "EyeZ"]
+
+    eye_samps = pd.concat([col1, col2, col3], axis=1)
+
+    eye_samps = eye_samps.to_numpy()
+
+    upsampled = resample(eye_samps, 45, 256)
+
+    print(upsampled[350:355])
+
+    # print(f"[{np.std(upsampled[start:end, 0])/np.mean(upsampled[start:end, 0])}]\n[{np.std(upsampled[start:end, 1])/np.mean(upsampled[start:end, 1])}]\n[{np.std(upsampled[start:end, 2])/np.mean(upsampled[start:end, 2])}]")
+
     pass
