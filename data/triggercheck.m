@@ -4,7 +4,7 @@ clear all;
 addpath(genpath("C:\Users\yudan\OneDrive\Desktop\eeg_attention\data"));
 
 trial_num=1; % for eye tracking
-block_num=1;
+block_num=1; % for subject
 
 % only training data is used?
 load(['C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eeg\Block_' num2str(block_num) '\Training.mat']);
