@@ -166,12 +166,13 @@ def resample(signal, orig_freq, desired_freq):
 
 def targets(arr, desired_freq):
     '''
-    Returns a 1d array of targets determined by the coefficient of variation of each window in the given array
+    Returns a 1d array of targets determined by the averaged coefficient of variation of each window in the given array
     '''
 
     window = desired_freq//10
 
     size = len(arr)//window
+    
     if (len(arr)%window > 0):
         size+=1
 
@@ -180,7 +181,8 @@ def targets(arr, desired_freq):
     ind = 0
     for num in range(0, len(arr), window):
         variationArr = scipy.stats.variation(arr[num:num+window], nan_policy='omit')
-        if (variationArr[0] > 0.001) and (variationArr[1] > 0.001):
+        print(np.mean(variationArr))
+        if np.mean(variationArr) < 0.001 or np.mean(variationArr)==np.nan:
             result[ind] = 1
         else:
             result[ind] = 0
@@ -188,7 +190,8 @@ def targets(arr, desired_freq):
 
     if (len(arr)%window > 0):
         final = scipy.stats.variation(arr[-len(arr)%window:])
-        if (final[0] > 0.001) or (final[1] > 0.001):
+        print(np.mean(final))
+        if np.mean(final) < 0.001 or np.mean(final)==np.nan:
             result[-1] = 1
         else:
             result[-1] = 0
