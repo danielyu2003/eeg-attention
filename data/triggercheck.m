@@ -3,8 +3,8 @@ clear all;
 
 addpath(genpath("C:\Users\yudan\OneDrive\Desktop\eeg_attention\data"));
 
-trial_num=1; % for eye tracking
-block_num=1; % for subject
+trial_num=2; % for eye tracking
+block_num=1; % for feedback type
 
 % only training data is used?
 load(['C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eeg\Block_' num2str(block_num) '\Training.mat']);
@@ -15,7 +15,9 @@ index_EEG=find(diff(double(states.DigitalInput1))~=0);
 %the miss trials, if it's odd, it means the trigger value starts at 1 and
 %you should delete the first trigger index as well
 
-eeg1=(index_EEG(5)-index_EEG(4));
+%for no feedback training, remove first and third trials, start between 4-5
+%if index len is odd, remove first index
+eeg1=(index_EEG(7)-index_EEG(6));
 
 Eye_all=readtable(['C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_' num2str(block_num) '\TRAINING\Trial_' num2str(trial_num) '.csv']);
 index_eye=find(diff(table2array(Eye_all(:,6)))~=0);

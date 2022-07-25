@@ -164,62 +164,34 @@ def resample(signal, orig_freq, desired_freq):
         signal)
     return resampled_signal
 
-def meanAndStdev(samps, freq_wind, choice=True):
+def targets(arr, desired_freq):
     '''
-    Parameters:
-    ---
-    samps : np.ndarray.dtype(float)
-        1d array of input data
-    freq_wind : int
-        Frequency window, approximately a tenth of the sampling frequency
-    choice : bool
-
-    Returns:
-    ---
-    targets : np.ndarray.dtype(float)
-    reshaped : np.ndarray.dtype(float)
-
-    Both return a 2d array containing the mean and stdev of each window specified by freq_wind
+    Returns a 1d array of targets determined by the coefficient of variation of each window in the given array
     '''
-    remainder = len(samps)%freq_wind
-    targets = [[np.mean(samps[ind*freq_wind:(ind*freq_wind)+freq_wind]), np.std(samps[ind*freq_wind:ind*freq_wind + freq_wind])] for ind in range(len(samps)//freq_wind)]
-    if choice:
-        reshaped = []
-        for ind in range(len(targets)):
-            reshaped += [targets[ind]]*freq_wind
-    if remainder:
-        targets += [[np.mean(samps[remainder:]), np.std(samps[remainder:])]]
-        if choice:
-            reshaped += remainder*[targets[-1]]
-    if choice:
-        return np.array(reshaped)
-    return np.array(targets)
 
-def averageThree(arr1, arr2, arr3, samp_freq):
-    '''
-    assuming all three inputs are of the same length
+    window = desired_freq//10
 
-    returns average of each mean and stdev of each sample
-    '''
-    averaged = []
-    data1 = meanAndStdev(arr1, samp_freq//10)
-    data2 = meanAndStdev(arr2, samp_freq//10)
-    data3 = meanAndStdev(arr3, samp_freq//10)
+    size = len(arr)//window
+    if (len(arr)%window > 0):
+        size+=1
 
-    for ind in range(len(data1)):
-        averaged+=[[np.mean((data1[ind, 0], data2[ind, 0], data3[ind, 0])), np.mean((data1[ind, 1], data2[ind, 1], data3[ind, 1]))]]
+    result = np.empty(size)
 
-    return np.array(averaged)
-
-def targets(arr):
-    print(arr)
-    result = np.empty(len(arr))
-    for ind in range(len(arr)):
-        
-        if arr[ind, 0] > arr[ind, 1]:
-            result[ind] = 0 
-        else:
+    ind = 0
+    for num in range(0, len(arr), window):
+        variationArr = scipy.stats.variation(arr[num:num+window], nan_policy='omit')
+        if (variationArr[0] > 0.001) and (variationArr[1] > 0.001):
             result[ind] = 1
+        else:
+            result[ind] = 0
+        ind+=1
+
+    if (len(arr)%window > 0):
+        final = scipy.stats.variation(arr[-len(arr)%window:])
+        if (final[0] > 0.001) or (final[1] > 0.001):
+            result[-1] = 1
+        else:
+            result[-1] = 0
 
     return result
 
@@ -249,37 +221,17 @@ def getTargets(eye_path, samp_freq, desired_freq):
 
     upsampled = resample(eye_samps, samp_freq, desired_freq)
 
-    transposed = upsampled.T
-
-    arr1 = transposed[0]
-    arr2 = transposed[1]
-    arr3 = transposed[2]
-
-    samp_targets = targets(averageThree(arr1, arr2, arr3, samp_freq))
+    samp_targets = targets(upsampled, desired_freq)
 
     return samp_targets
 
 if __name__ == '__main__':
 
-    # getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 45, 256)
+    print(getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256))
 
     # leave out eyeZ data?
 
     # assign labels based on coefficient of variation? stdev/mean
-
-    df = pd.read_csv(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", skiprows=1)[1:]
-
-    col1 = df.loc[:, "EyeX"]
-    col2 = df.loc[:, "EyeY"]
-    col3 = df.loc[:, "EyeZ"]
-
-    eye_samps = pd.concat([col1, col2, col3], axis=1)
-
-    eye_samps = eye_samps.to_numpy()
-
-    upsampled = resample(eye_samps, 45, 256)
-
-    print(upsampled[350:355])
 
     # print(f"[{np.std(upsampled[start:end, 0])/np.mean(upsampled[start:end, 0])}]\n[{np.std(upsampled[start:end, 1])/np.mean(upsampled[start:end, 1])}]\n[{np.std(upsampled[start:end, 2])/np.mean(upsampled[start:end, 2])}]")
 
