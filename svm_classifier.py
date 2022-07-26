@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 from mpl_toolkits.mplot3d import Axes3D
+from itertools import repeat
 from sklearn import metrics
 from sklearn import svm
 import matplotlib.pyplot as plt
@@ -164,41 +165,38 @@ def resample(signal, orig_freq, desired_freq):
         signal)
     return resampled_signal
 
+def label(stdev):
+    if stdev < 0.002:
+        return 1
+    else:
+        return 0
+
 def targets(arr, desired_freq):
     '''
     Returns a 1d array of targets determined by the averaged coefficient of variation of each window in the given array
     '''
 
-    window = desired_freq//10
+    averages = [np.mean(samp) for samp in arr]
 
-    size = len(arr)//window
-    
-    if (len(arr)%window > 0):
-        size+=1
+    interval = desired_freq//10
 
-    result = np.empty(size)
+    remainder = len(averages)%interval
 
-    ind = 0
-    for num in range(0, len(arr), window):
-        variationArr = scipy.stats.variation(arr[num:num+window], nan_policy='omit')
-        print(np.mean(variationArr))
-        if np.mean(variationArr) < 0.001 or np.mean(variationArr)==np.nan:
-            result[ind] = 1
-        else:
-            result[ind] = 0
-        ind+=1
+    stdev = [np.std(averages[ind:ind+interval]) for ind in range(len(averages)//interval)]
 
-    if (len(arr)%window > 0):
-        final = scipy.stats.variation(arr[-len(arr)%window:])
-        print(np.mean(final))
-        if np.mean(final) < 0.001 or np.mean(final)==np.nan:
-            result[-1] = 1
-        else:
-            result[-1] = 0
+    result = [x for item in stdev for x in repeat(item, interval)]
 
-    return result
+    if remainder:
+        result+=[np.std(averages[-remainder:])]*remainder
 
-def getTargets(eye_path, samp_freq, desired_freq):
+    labels = [label(num) for num in result]
+
+    print(f"percent of attentive samples: {round(sum(labels)/len(labels) * 100, 2)}%")
+
+    return labels
+
+
+def getTargets(eye_path, samp_freq, desired_freq, startind, endind):
     '''
     Takes in eye tracking data (as csv) and returns a np array of 1s and 0s
 
@@ -220,7 +218,7 @@ def getTargets(eye_path, samp_freq, desired_freq):
 
     eye_samps = pd.concat([col1, col2, col3], axis=1)
 
-    eye_samps = eye_samps.to_numpy()
+    eye_samps = eye_samps.to_numpy()[startind:endind]
 
     upsampled = resample(eye_samps, samp_freq, desired_freq)
 
@@ -230,12 +228,6 @@ def getTargets(eye_path, samp_freq, desired_freq):
 
 if __name__ == '__main__':
 
-    print(getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256))
-
-    # leave out eyeZ data?
-
-    # assign labels based on coefficient of variation? stdev/mean
-
-    # print(f"[{np.std(upsampled[start:end, 0])/np.mean(upsampled[start:end, 0])}]\n[{np.std(upsampled[start:end, 1])/np.mean(upsampled[start:end, 1])}]\n[{np.std(upsampled[start:end, 2])/np.mean(upsampled[start:end, 2])}]")
+    getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256, 673,2292)
 
     pass
