@@ -4,7 +4,7 @@ import os
 
 os.chdir(os.path.dirname(__file__))
 
-def toCSV(subject_num, source):
+def toCSV(source):
     '''
     converts the signal data from the .mat files in the as_mat subdirectory to csv files in as_csv
     @param subject_num : str
@@ -34,7 +34,7 @@ def toCSV(subject_num, source):
             
             df = pd.DataFrame(signal_data)
             # update the subject number below as needed
-            df.to_csv(f'as_csv\\Sub_{subject_num}_Block_{file_index}.csv')
+            df.to_csv(f'as_csv\\Training_{file_index}.csv', header=False, index=False)
             file_index+=1
             continue
         else:
@@ -78,7 +78,7 @@ def deleteMats():
 
 def main():
     print('starting')
-    toCSV('2', 2)
+    deleteMats()
     print('finished')
     return
 

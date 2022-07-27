@@ -1,7 +1,12 @@
+'''
+Author: Daniel Yu
+'''
+
 from sklearn.model_selection import train_test_split
 from mpl_toolkits.mplot3d import Axes3D
 from itertools import repeat
 from sklearn import metrics
+from sklearn import utils
 from sklearn import svm
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -88,7 +93,7 @@ class EEGClassifier:
         self.y_pred = self.classifier.predict(self.x_test)
         pass
 
-    def predictExample(self, example):
+    def predictExample(self, example, labels=[], metric=False, plot=False):
         '''
         Passes a sample to the trained classifier for prediction
 
@@ -96,13 +101,32 @@ class EEGClassifier:
         ---
         example : numpy.ndarray.dtype(float64)
             contains an array of samples (which are arrays of floats matching the feature dimensions)
+        labels : numpy.ndarray.dtype(int)
+            contains an array of labels (either 1 or 0) corresponding to each sample in example
+        metrics : bool
+            if enabled, prints accuracy, precision, and recall of the predicted examples
+        plot : bool
+            if enabled, plots the accuracy of the predicted labels against truth
 
         Returns:
         ---
-            output : int
-                either 0 or 1, corresponding to the label associated with each number
+            output : numpy.ndarray.dtype(int)
+                an array containing 0 and 1s, corresponding to the label predicted for each sample
         '''
         output = self.classifier.predict(example)
+
+        if metric==True:
+            print("Accuracy:",metrics.accuracy_score(labels, output))
+            print("Precision:",metrics.precision_score(labels, output))
+            print("Recall:",metrics.recall_score(labels, output))
+
+        if plot==True:
+            plt.figure()
+            plt.plot(range(0, len(labels)), labels, 'b', label='truth')
+            plt.plot(range(0,len(output)), output,'r',label='SVM')
+            plt.legend()
+            plt.show()
+
         return output
 
     def getMetrics(self):
@@ -171,7 +195,7 @@ def label(stdev):
     else:
         return 0
 
-def targets(arr, desired_freq):
+def targets(arr, desired_freq, verbose=False):
     '''
     Returns a 1d array of targets determined by the averaged coefficient of variation of each window in the given array
     '''
@@ -191,12 +215,13 @@ def targets(arr, desired_freq):
 
     labels = [label(num) for num in result]
 
-    print(f"percent of attentive samples: {round(sum(labels)/len(labels) * 100, 2)}%")
+    if verbose == True:
+        print(f"percent of attentive samples: {round(sum(labels)/len(labels) * 100, 2)}%")
 
     return labels
 
 
-def getTargets(eye_path, samp_freq, desired_freq, startind, endind):
+def getTargets(eye_path, samp_freq, desired_freq, startind, endind, verbose=False):
     '''
     Takes in eye tracking data (as csv) and returns a np array of 1s and 0s
 
@@ -222,12 +247,61 @@ def getTargets(eye_path, samp_freq, desired_freq, startind, endind):
 
     upsampled = resample(eye_samps, samp_freq, desired_freq)
 
-    samp_targets = targets(upsampled, desired_freq)
+    samp_targets = targets(upsampled, desired_freq, verbose)
 
     return samp_targets
 
+def interpol(signal, desired_len):
+    resampled_signal = np.interp(
+        np.linspace(0.0, 1.0, desired_len, endpoint=False),
+        np.linspace(0.0, 1.0, len(signal), endpoint=False),
+        signal)
+    return resampled_signal
+
 if __name__ == '__main__':
 
-    getTargets(r"C:\Users\yudan\OneDrive\Desktop\eeg_attention\data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256, 673,2292)
+    # No feedback
+
+    block1 = pd.read_csv(r"data\eeg\Training_1.csv", header=None)
+    bl_1_samples1 = block1.loc[36526:45328]
+    bl_1_samples2 = block1.loc[83421:92819]
+    bl_1_samples3 = block1.loc[113067:119148]
+    bl_1_samples4 = block1.loc[127966:138086]
+    bl_1_samples5 = block1.loc[147872:158022]
+    bl_1_targets1 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_1.csv", 51, 256, 844,2610)
+    bl_1_targets2 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256, 673,2292)
+    bl_1_targets3 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_3.csv", 51, 256, 943,2574)
+    bl_1_targets4 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_4.csv", 51, 256, 733,2598)
+    bl_1_targets5 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 637,2174)
+    bl_1_samps = pd.concat([bl_1_samples1, bl_1_samples2, bl_1_samples3, bl_1_samples4, bl_1_samples5]).to_numpy()
+    bl_1_targs = np.rint(interpol(np.concatenate((bl_1_targets1, bl_1_targets2, bl_1_targets2, bl_1_targets4, bl_1_targets5)), len(bl_1_samps)))
+
+    block3 = pd.read_csv(r"data\eeg\Training_3.csv", header=None)
+    bl_3_samples1 = block3.loc[16557:26620]
+    bl_3_samples2 = block3.loc[37056:46653]
+    bl_3_samples3 = block3.loc[68025:78037]
+    bl_3_samples4 = block3.loc[87211:97344]
+    bl_3_samples5 = block3.loc[117232:126776]
+    bl_3_targets1 = getTargets(r"data\eye\BLOCK_3\TRAINING\Trial_1.csv", 51, 256, 1088, 2873)
+    bl_3_targets2 = getTargets(r"data\eye\BLOCK_3\TRAINING\Trial_2.csv", 51, 256, 789, 2436)
+    bl_3_targets3 = getTargets(r"data\eye\BLOCK_3\TRAINING\Trial_3.csv", 51, 256, 1793, 3573)
+    bl_3_targets4 = getTargets(r"data\eye\BLOCK_3\TRAINING\Trial_4.csv", 51, 256, 1005, 2804)
+    bl_3_targets5 = getTargets(r"data\eye\BLOCK_3\TRAINING\Trial_5.csv", 51, 256, 1836, 3564)
+    bl_3_samps = pd.concat([bl_3_samples1, bl_3_samples2, bl_3_samples3, bl_3_samples4, bl_3_samples5]).to_numpy()
+    bl_3_targs = np.rint(interpol(np.concatenate((bl_3_targets1, bl_3_targets2, bl_3_targets3, bl_3_targets4, bl_3_targets5)), len(bl_3_samps)))
+
+    multimodal = EEGClassifier(bl_3_samps, bl_3_targs)
+    multimodal.fit()
+    
+    no_feed = EEGClassifier(bl_1_samps, bl_1_targs)
+    no_feed.fit()
+    no_feed.predict()
+
+    print("multimodal performance: \n")
+    multimodal.predictExample(bl_1_samps, bl_1_targs, metric=True)
+    print("\n")
+    print("no feedback perfomance: \n")
+    no_feed.getMetrics()
+
 
     pass
