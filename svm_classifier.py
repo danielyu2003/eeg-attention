@@ -260,31 +260,31 @@ def interpol(signal, desired_len):
 
 if __name__ == '__main__':
 
-    # No feedback
-    print('---no feedback---')
-    block1 = pd.read_csv(r"data\eeg\Training_1.csv", header=None)
-    bl_1_samples1 = block1.loc[36526:45328]
-    bl_1_samples2 = block1.loc[83421:92819]
-    bl_1_samples3 = block1.loc[113067:119148]
-    bl_1_samples4 = block1.loc[127966:138086]
-    bl_1_samples5 = block1.loc[147872:158022]
-    bl_1_samples6 = block1.loc[166446:178348]
-    bl_1_samples7 = block1.loc[118284:200735]
-    bl_1_samples8 = block1.loc[209706:221794]
-    bl_1_samples9 = block1.loc[231059:245642]
-    bl_1_samples10 = block1.loc[253869:265130]
-    bl_1_targets1 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_1.csv", 51, 256, 844,2610)
-    bl_1_targets2 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256, 673,2292)
-    bl_1_targets3 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_3.csv", 51, 256, 943,2574)
-    bl_1_targets4 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_4.csv", 51, 256, 733,2598)
-    bl_1_targets5 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 637,2174)
-    bl_1_targets6 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 629,2446)
-    bl_1_targets7 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 810,2466)
-    bl_1_targets8 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 811,2439)
-    bl_1_targets9 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 885,2387)
-    bl_1_targets10 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 790,2553)
-    bl_1_samps = pd.concat([bl_1_samples1, bl_1_samples2, bl_1_samples3, bl_1_samples4, bl_1_samples5, bl_1_samples6, bl_1_samples7, bl_1_samples8, bl_1_samples9, bl_1_samples10]).to_numpy()
-    bl_1_targs = np.rint(interpol(np.concatenate((bl_1_targets1, bl_1_targets2, bl_1_targets3, bl_1_targets4, bl_1_targets5, bl_1_targets6, bl_1_targets7, bl_1_targets8, bl_1_targets9, bl_1_targets10)), len(bl_1_samps)))
+    # # No feedback
+    # print('---no feedback---')
+    # block1 = pd.read_csv(r"data\eeg\Training_1.csv", header=None)
+    # bl_1_samples1 = block1.loc[36526:45328]
+    # bl_1_samples2 = block1.loc[83421:92819]
+    # bl_1_samples3 = block1.loc[113067:119148]
+    # bl_1_samples4 = block1.loc[127966:138086]
+    # bl_1_samples5 = block1.loc[147872:158022]
+    # bl_1_samples6 = block1.loc[166446:178348]
+    # bl_1_samples7 = block1.loc[118284:200735]
+    # bl_1_samples8 = block1.loc[209706:221794]
+    # bl_1_samples9 = block1.loc[231059:245642]
+    # bl_1_samples10 = block1.loc[253869:265130]
+    # bl_1_targets1 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_1.csv", 51, 256, 844,2610)
+    # bl_1_targets2 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_2.csv", 51, 256, 673,2292)
+    # bl_1_targets3 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_3.csv", 51, 256, 943,2574)
+    # bl_1_targets4 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_4.csv", 51, 256, 733,2598)
+    # bl_1_targets5 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 637,2174)
+    # bl_1_targets6 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 629,2446)
+    # bl_1_targets7 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 810,2466)
+    # bl_1_targets8 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 811,2439)
+    # bl_1_targets9 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 885,2387)
+    # bl_1_targets10 = getTargets(r"data\eye\BLOCK_1\TRAINING\Trial_5.csv", 51, 256, 790,2553)
+    # bl_1_samps = pd.concat([bl_1_samples1, bl_1_samples2, bl_1_samples3, bl_1_samples4, bl_1_samples5, bl_1_samples6, bl_1_samples7, bl_1_samples8, bl_1_samples9, bl_1_samples10]).to_numpy()
+    # bl_1_targs = np.rint(interpol(np.concatenate((bl_1_targets1, bl_1_targets2, bl_1_targets3, bl_1_targets4, bl_1_targets5, bl_1_targets6, bl_1_targets7, bl_1_targets8, bl_1_targets9, bl_1_targets10)), len(bl_1_samps)))
     # print(len(bl_1_samps))
 
     # single channel (visual only)
@@ -345,38 +345,38 @@ if __name__ == '__main__':
     print("fitting multimodal")
     multimodal.fit()
 
-    visual = EEGClassifier(bl_2_samps, bl_2_targs)
-    print("fitting visual")
-    visual.fit()
+    # visual = EEGClassifier(bl_2_samps, bl_2_targs)
+    # print("fitting visual")
+    # visual.fit()
     
-    no_feed = EEGClassifier(bl_1_samps, bl_1_targs)
-    print("fitting no_feed")
-    no_feed.fit()
+    # no_feed = EEGClassifier(bl_1_samps, bl_1_targs)
+    # print("fitting no_feed")
+    # no_feed.fit()
 
     print("multimodal performance:")
-    multimodal.predictExample(bl_1_samps, bl_1_targs, metric=True, plot=True)
-    print('---')
+    # multimodal.predictExample(bl_1_samps, bl_1_targs, metric=True, plot=True)
+    # print('---')
     multimodal.predictExample(bl_2_samps, bl_2_targs, metric=True, plot=True)
-    print('---')
-    multimodal.predict()
-    multimodal.getMetrics()
-    multimodal.plotAcc()
-    print('\n')
-    print("visual perfomance:")
-    visual.predictExample(bl_1_samps, bl_1_targs, metric=True, plot=True)
-    print('---')
-    visual.predict()
-    visual.getMetrics()
-    visual.plotAcc()
-    print('---')
-    visual.predictExample(bl_3_samps, bl_3_targs, metric=True, plot=True)
-    print('\n')
-    print("no_feed perfomance:")
-    no_feed.predict()
-    no_feed.getMetrics()
-    no_feed.plotAcc()
-    print('---')
-    no_feed.predictExample(bl_2_samps, bl_2_targs, metric=True, plot=True)
-    print('---')
-    no_feed.predictExample(bl_3_samps, bl_3_targs, metric=True, plot=True)
+    # print('---')
+    # multimodal.predict()
+    # multimodal.getMetrics()
+    # multimodal.plotAcc()
+    # print('\n')
+    # print("visual perfomance:")
+    # visual.predictExample(bl_1_samps, bl_1_targs, metric=True, plot=True)
+    # print('---')
+    # visual.predict()
+    # visual.getMetrics()
+    # visual.plotAcc()
+    # print('---')
+    # visual.predictExample(bl_3_samps, bl_3_targs, metric=True, plot=True)
+    # print('\n')
+    # print("no_feed perfomance:")
+    # no_feed.predict()
+    # no_feed.getMetrics()
+    # no_feed.plotAcc()
+    # print('---')
+    # no_feed.predictExample(bl_2_samps, bl_2_targs, metric=True, plot=True)
+    # print('---')
+    # no_feed.predictExample(bl_3_samps, bl_3_targs, metric=True, plot=True)
     pass
